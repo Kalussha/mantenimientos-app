@@ -73,10 +73,13 @@ export async function obtenerCitasMantenimiento(): Promise<CitaMantenimiento[]> 
     return []
   }
 
-  // Transformar: Supabase devuelve equipos como array, pero es 1:1
+  // Transformar: Supabase devuelve relaciones como arrays, pero son 1:1
   return (data || []).map(cita => ({
     ...cita,
-    equipos: cita.equipos?.[0] || null
+    equipos: cita.equipos?.[0] ? {
+      ...cita.equipos[0],
+      usuarios: cita.equipos[0].usuarios?.[0] || null
+    } : null
   }))
 }
 
