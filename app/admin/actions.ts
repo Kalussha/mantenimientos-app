@@ -3,7 +3,36 @@
 import { createServerSupabaseClient } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 
-export async function obtenerCitasMantenimiento() {
+export interface CitaMantenimiento {
+  id: string
+  fecha: string
+  hora: string
+  estado: string
+  tipo_mantenimiento: string
+  descripcion_problema: string | null
+  solucion_aplicada: string | null
+  tecnico_asignado: string | null
+  created_at: string
+  equipos: {
+    id: string
+    descripcion: string
+    numero_serie: string
+    marca: string | null
+    modelo: string | null
+    tipo_equipo: string
+    usuarios: {
+      id: string
+      nombre_completo: string
+      email: string
+      departamentos: {
+        id: string
+        nombre: string
+      } | null
+    } | null
+  } | null
+}
+
+export async function obtenerCitasMantenimiento(): Promise<CitaMantenimiento[]> {
   const supabase = createServerSupabaseClient()
 
   const { data, error } = await supabase
@@ -44,7 +73,11 @@ export async function obtenerCitasMantenimiento() {
     return []
   }
 
-  return data || []
+  // Transformar: Supabase devuelve equipos como array, pero es 1:1
+  return (data || []).map(cita => ({
+    ...cita,
+    equipos: cita.equipos?.[0] || null
+  }))
 }
 
 export async function actualizarEstadoCita(citaId: string, nuevoEstado: 'Pendiente' | 'En Proceso' | 'Completado' | 'Cancelado' | 'Reprogramado') {
