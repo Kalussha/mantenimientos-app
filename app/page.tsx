@@ -295,7 +295,7 @@ export default function HomePage() {
                   mode="single"
                   locale={es}
                   minDate={new Date()}
-                  disabledDays={date => {
+                  disabledDays={(date: Date) => {
                     const hoy = new Date()
                     hoy.setHours(0, 0, 0, 0)
                     return date < hoy || date.getDay() === 0 || date.getDay() === 6
