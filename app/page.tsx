@@ -16,11 +16,14 @@ const TIPOS_EQUIPO = [
 ] as const
 
 const DEPARTAMENTOS = [
-  { id: '1', nombre: 'Tecnología de la Información' },
-  { id: '2', nombre: 'Recursos Humanos' },
-  { id: '3', nombre: 'Finanzas' },
-  { id: '4', nombre: 'Operaciones' },
-  { id: '5', nombre: 'Dirección General' },
+  "GPIESA",
+  "Compras",
+  "Almacén",
+  "Automatización",
+  "Cobranza",
+  "Ventas",
+  "Sistemas",
+  "Administración"
 ] as const
 
 const HORAS_LABORALES = Array.from({ length: 9 }, (_, i) => {
@@ -223,7 +226,7 @@ export default function HomePage() {
                 >
                   <option value="">Seleccionar departamento</option>
                   {DEPARTAMENTOS.map(d => (
-                    <option key={d.id} value={d.id}>{d.nombre}</option>
+                    <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
                 {errors.idDepartamento && <p className="mt-1.5 text-sm text-red-600">{errors.idDepartamento}</p>}

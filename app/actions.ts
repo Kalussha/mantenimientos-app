@@ -4,9 +4,20 @@ import { createServerSupabaseClient } from '@/lib/supabase'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 
+const DEPARTAMENTOS_VALIDOS = [
+  "GPIESA",
+  "Compras",
+  "Almacén",
+  "Automatización",
+  "Cobranza",
+  "Ventas",
+  "Sistemas",
+  "Administración"
+] as const
+
 const formSchema = z.object({
   nombreCompleto: z.string().min(2, 'Mínimo 2 caracteres'),
-  idDepartamento: z.string().uuid('Departamento inválido'),
+  idDepartamento: z.enum(DEPARTAMENTOS_VALIDOS, { message: 'Departamento inválido' }),
   tipoEquipo: z.string().min(1, 'Seleccione un tipo de equipo'),
   numeroSerie: z.string().min(3, 'Mínimo 3 caracteres'),
   fecha: z.string().refine((date) => !isNaN(Date.parse(date)), 'Fecha inválida'),
@@ -17,6 +28,38 @@ export type FormData = z.infer<typeof formSchema>
 export type ActionResult =
   | { success: true; citaId: string }
   | { success: false; error: string; fieldErrors?: Record<string, string[]> }
+
+async function obtenerOCrearDepartamento(supabase: ReturnType<typeof createServerSupabaseClient>, nombre: string): Promise<string> {
+  // Buscar departamento existente por nombre
+  const { data: deptExistente, error: deptError } = await supabase
+    .from('departamentos')
+    .select('id')
+    .eq('nombre', nombre)
+    .single()
+
+  if (deptError && deptError.code !== 'PGRST116') {
+    console.error('Error buscando departamento:', deptError)
+    throw new Error('Error al buscar departamento')
+  }
+
+  if (deptExistente) {
+    return deptExistente.id
+  }
+
+  // Crear departamento si no existe
+  const { data: nuevoDept, error: insertDeptError } = await supabase
+    .from('departamentos')
+    .insert({ nombre, activo: true })
+    .select('id')
+    .single()
+
+  if (insertDeptError) {
+    console.error('Error creando departamento:', insertDeptError)
+    throw new Error('Error al crear departamento')
+  }
+
+  return nuevoDept.id
+}
 
 export async function agendarMantenimiento(formData: FormData): Promise<ActionResult> {
   const parsed = formSchema.safeParse(formData)
@@ -33,6 +76,9 @@ export async function agendarMantenimiento(formData: FormData): Promise<ActionRe
   const supabase = createServerSupabaseClient()
 
   try {
+    // Obtener o crear departamento y obtener su UUID
+    const idDepartamento = await obtenerOCrearDepartamento(supabase, data.idDepartamento)
+
     let usuarioId: string
 
     const { data: usuarioExistente, error: usuarioError } = await supabase
@@ -53,7 +99,7 @@ export async function agendarMantenimiento(formData: FormData): Promise<ActionRe
         .from('usuarios')
         .insert({
           nombre_completo: data.nombreCompleto,
-          id_departamento: data.idDepartamento,
+          id_departamento: idDepartamento,
           email: `${data.nombreCompleto.toLowerCase().replace(/\s+/g, '.')}@empresa.com`,
           activo: true,
         })
