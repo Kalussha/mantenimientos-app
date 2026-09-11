@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+}
+
+@layer utilities {
+  .rdp-button {
+    @apply w-10 h-10 rounded-md font-medium text-gray-900 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+  
+  .rdp-button:disabled {
+    @apply text-gray-300 cursor-not-allowed hover:bg-transparent;
+  }
+  
+  .rdp-button_selected {
+    @apply bg-blue-600 text-white hover:bg-blue-700;
+  }
+  
+  .rdp-button_today {
+    @apply font-bold text-blue-600;
+  }
+  
+  .rdp-caption_label {
+    @apply text-lg font-semibold text-gray-900;
+  }
+  
+  .rdp-head_cell {
+    @apply text-xs font-medium text-gray-500 uppercase;
+  }
+}
