@@ -73,12 +73,14 @@ export async function obtenerCitasMantenimiento(): Promise<CitaMantenimiento[]> 
     return []
   }
 
-  // Transformar: Supabase devuelve TODAS las relaciones como arrays, pero son 1:1
+  // Supabase devuelve relaciones 1:1 como objetos (no arrays)
   return (data || []).map(cita => {
-    const equipo = cita.equipos?.[0]
-    const usuario = equipo?.usuarios?.[0]
-    const dept = usuario?.departamentos?.[0]
-    
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const raw = cita as any
+    const equipo = Array.isArray(raw.equipos) ? raw.equipos[0] : raw.equipos
+    const usuario = equipo ? (Array.isArray(equipo.usuarios) ? equipo.usuarios[0] : equipo.usuarios) : null
+    const dept = usuario ? (Array.isArray(usuario.departamentos) ? usuario.departamentos[0] : usuario.departamentos) : null
+
     return {
       ...cita,
       equipos: equipo ? {
@@ -88,7 +90,7 @@ export async function obtenerCitasMantenimiento(): Promise<CitaMantenimiento[]> 
           departamentos: dept || null
         } : null
       } : null
-    }
+    } as CitaMantenimiento
   })
 }
 

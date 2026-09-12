@@ -31,7 +31,7 @@ const HORAS_LABORALES = Array.from({ length: 9 }, (_, i) => {
   return `${h.toString().padStart(2, '0')}:00`
 })
 
-type FormData = {
+type FormState = {
   nombreCompleto: string
   idDepartamento: typeof DEPARTAMENTOS[number] | ''
   tipoEquipo: string
@@ -40,10 +40,10 @@ type FormData = {
   hora: string
 }
 
-type FieldErrors = Partial<Record<keyof FormData, string>>
+type FieldErrors = Partial<Record<keyof FormState, string>>
 
 export default function HomePage() {
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState<FormState>({
     nombreCompleto: '',
     idDepartamento: '',
     tipoEquipo: '',
@@ -56,7 +56,7 @@ export default function HomePage() {
   const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [serverError, setServerError] = useState('')
 
-  const validateField = (name: keyof FormData, value: string | Date | undefined): string | undefined => {
+  const validateField = (name: keyof FormState, value: string | Date | undefined): string | undefined => {
     switch (name) {
       case 'nombreCompleto':
         return value && (value as string).trim().length >= 2 ? undefined : 'Mínimo 2 caracteres'
@@ -75,7 +75,7 @@ export default function HomePage() {
     }
   }
 
-  const handleChange = (name: keyof FormData, value: string | Date | undefined) => {
+  const handleChange = (name: keyof FormState, value: string | Date | undefined) => {
     setFormData(prev => ({ ...prev, [name]: value }))
     const error = validateField(name, value)
     setErrors(prev => ({ ...prev, [name]: error }))
@@ -88,7 +88,7 @@ export default function HomePage() {
     const newErrors: FieldErrors = {}
     let hasErrors = false
 
-    ;(Object.keys(formData) as Array<keyof FormData>).forEach(key => {
+    ;(Object.keys(formData) as Array<keyof FormState>).forEach(key => {
       const error = validateField(key, formData[key])
       if (error) {
         newErrors[key] = error
@@ -132,7 +132,7 @@ export default function HomePage() {
       if (result.fieldErrors) {
         const fieldErrors: FieldErrors = {}
         Object.entries(result.fieldErrors).forEach(([key, messages]) => {
-          fieldErrors[key as keyof FormData] = messages[0]
+          fieldErrors[key as keyof FormState] = messages[0]
         })
         setErrors(fieldErrors)
       }
@@ -373,7 +373,7 @@ export default function HomePage() {
         </p>
       </div>
 
-      <style jsx global>{`
+      <style>{`
         @keyframes fade-in {
           from { opacity: 0; transform: translateY(-10px); }
           to { opacity: 1; transform: translateY(0); }
