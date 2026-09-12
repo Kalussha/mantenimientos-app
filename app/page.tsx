@@ -33,7 +33,7 @@ const HORAS_LABORALES = Array.from({ length: 9 }, (_, i) => {
 
 type FormData = {
   nombreCompleto: string
-  idDepartamento: typeof DEPARTAMENTOS[number]
+  idDepartamento: typeof DEPARTAMENTOS[number] | ''
   tipoEquipo: string
   numeroSerie: string
   fecha: Date | undefined
